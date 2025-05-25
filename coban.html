@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hệ thống dự đoán Baccarat Pro - Gói Cơ Bản</title>
+    <link rel="icon" href="icon.ico" type="image/x-icon">
+
+    <!-- Thêm thư viện Chart.js và file xử lý backend -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="coban_predictor.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body { 
+            font-family: 'Arial', sans-serif; 
+            background-color: #1a2c38; 
+            color: #ffffff;
+            padding: 20px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container { 
+            width: 700px;
+            background-color: #1a2c38;
+            padding: 30px; 
+            position: relative;
+        }
+        h1 {
+            text-align: center; 
+            color: #FFD700; 
+            margin-bottom: 20px;
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .premium-badge {
+            background-color: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        .result {
+            font-size: 1.3em;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+            padding: 10px;
+            background-color: #263544;
+            color: #ffffff;
+            border-radius: 8px;
+        }
+        .result.success {
+            background-color: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4CAF50;
+        }
+        .result.error {
+            background-color: rgba(244, 67, 54, 0.2);
+            border: 1px solid #F44336;
+        }
+        .history, .win-loss, .win-loss-count, .buttons, .stats-section {
+            margin-bottom: 20px;
+        }
+        .history p,
+        .win-loss p {
+            font-size: 1.2em; 
+            text-align: center;
+            padding: 10px;
+            background-color: #263544;
+            border-radius: 8px;
+            min-height: 40px;
+        }
+        .char-green {
+            background-color: #4CAF50;
+            padding: 6px 12px;
+            border-radius: 4px; 
+            margin: 3px;
+            color: #ffffff;
+            font-weight: bold;
+        }
+        .char-red {
+            background-color: #F44336; 
+            padding: 6px 12px;
+            border-radius: 4px; 
+            margin: 3px;
+            color: #ffffff;
+            font-weight: bold;
+        }
+        .win {
+            color: #4CAF50; 
+            margin: 0 5px;
+            font-weight: bold;
+        }
+        .loss {
+            color: #F44336; 
+            margin: 0 5px;
+            font-weight: bold;
+        }
+        .win-loss-count p {
+            font-size: 1.3em;
+            text-align: center;
+            padding: 10px;
+            background-color: #263544;
+            border-radius: 8px;
+        }
+        .win-value {
+            color: #4CAF50; 
+            font-weight: bold;
+        }
+        .loss-value {
+            color: #F44336; 
+            font-weight: bold;
+        }
+        .buttons form {
+            display: flex; 
+            justify-content: center; 
+            gap: 15px; 
+            flex-wrap: wrap;
+        }
+        .buttons button {
+            padding: 10px 20px; 
+            font-size: 1em;
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            color: #ffffff;
+            transition: all 0.3s;
+            background-color: #FFD700;
+        }
+        .buttons button.value-P {
+            background-color: #4CAF50; /* Player */
+        }
+        .buttons button.value-B {
+            background-color: #F44336; /* Banker */
+        }
+        .buttons button.value-reset {
+            background-color: #2196F3; /* Reset */
+        }
+        .buttons button:hover { 
+            opacity: 0.9;
+        }
+        .stats-section {
+            text-align: center;
+            font-size: 1.2em;
+            background-color: #263544;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 25px;
+        }
+        .stats-section h3 {
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .stat-item {
+            background-color: #1a2c38;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .stat-value {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #3498db;
+            margin-top: 5px;
+        }
+        .prediction {
+            padding: 20px;
+            background-color: #263544; 
+            color: #ffffff;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .prediction p.suggested-bet {
+            text-align: center;
+            font-size: 2em; 
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .real-use {
+            background-color: #3498db; 
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-right: 8px;
+            font-size: 0.8em;
+            color: #ffffff;
+        }
+        .instructions {
+            padding: 15px;
+            background-color: #263544;
+            color: #ffffff;
+            display: none; 
+            border-radius: 8px; 
+        }
+        .instructions h3 {
+            color: #FFD700; 
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        .instructions ol {
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.5em;
+            font-size: 1em;
+        }
+        .toggle-instructions {
+            display: block;
+            margin: 0 auto 20px auto;
+            padding: 8px 16px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            background-color: #FFD700; 
+            color: #1a2c38;
+            border-radius: 4px; 
+            transition: all 0.3s;
+        }
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            background-color: #1A1A1A;
+            padding: 10px;
+            border-radius: 8px; 
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .stats-charts {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stats-chart {
+            flex: 1;
+            background-color: #1A1A1A;
+            padding: 10px;
+            border-radius: 8px;
+            height: 200px;
+        }
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            background-color: #263544;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .mode-btn {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background-color: #1a2c38;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .mode-btn.active {
+            background-color: #3498db;
+            font-weight: bold;
+        }
+        .footer { 
+            text-align: center; 
+            font-size: 0.9em; 
+            color: #B0BEC5; 
+            margin-top: 20px;
+        }
+        .footer a {
+            color: #FFD700;
+            text-decoration: none;
+        }
+        .upgrade-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 24px;
+            background-color: #9b59b6;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s;
+        }
+        .upgrade-btn:hover {
+            background-color: #8e44ad;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Hệ thống dự đoán Baccarat Pro <span class="premium-badge">Gói Cơ Bản</span></h1>
+    <center><h3>Tỷ lệ thắng tối ưu 75% với thuật toán phân tích dữ liệu nâng cao</h3></center>
+    
+    <!-- Chọn chế độ -->
+    <div class="mode-selector">
+        <button class="mode-btn active" id="standard-mode">Chế độ thông thường</button>
+        <button class="mode-btn" id="advanced-mode">Chế độ nâng cao</button>
+    </div>
+    
+    <!-- Kết quả -->
+    <div class="result">Nhập 5 kết quả đầu tiên để bắt đầu dự đoán</div>
+    
+    <!-- Dự đoán -->
+    <div class="prediction">
+        <p class="suggested-bet"><span class="real-use">Cần thêm 5 kết quả</span><br>Vui lòng nhập đủ 5 kết quả đầu tiên</p>
+    </div>
+    
+    <!-- Lịch sử -->
+    <div class="history">
+        <p></p>
+    </div>
+
+    <!-- Chuỗi thắng/thua -->
+    <div class="win-loss">
+        <p></p>
+    </div>
+
+    <!-- Tổng thắng/thua -->
+    <div class="win-loss-count">
+        <p>
+            Tổng thắng: <span class="win-value">0</span> | 
+            Tổng thua: <span class="loss-value">0</span> | 
+            Tỷ lệ thành công: <span class="win-value">0%</span>
+        </p>
+    </div>
+    
+    <!-- Nút bấm -->
+    <div class="buttons">
+        <form method="POST">
+            <button type="submit" name="action" value="P" class="value-P">Player (P)</button>
+            <button type="submit" name="action" value="B" class="value-B">Banker (B)</button>
+            <button type="submit" name="action" value="reset" class="value-reset">Làm mới</button>
+        </form>
+    </div>
+
+    <!-- Biểu đồ -->
+    <div class="chart-container">
+        <canvas id="dataChart"></canvas>
+    </div>
+    
+    <!-- Thống kê -->
+    <div class="stats-section">
+        <h3>Thống kê chi tiết</h3>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div>Phiên hiện tại</div>
+                <div class="stat-value">1</div>
+            </div>
+            <div class="stat-item">
+                <div>Số lần Player thắng</div>
+                <div class="stat-value">0</div>
+            </div>
+            <div class="stat-item">
+                <div>Số lần Banker thắng</div>
+                <div class="stat-value">0</div>
+            </div>
+            <div class="stat-item">
+                <div>Chuỗi thắng dài nhất</div>
+                <div class="stat-value">0</div>
+            </div>
+        </div>
+        
+        <div class="stats-charts">
+            <div class="stats-chart">
+                <canvas id="pieChart"></canvas>
+            </div>
+            <div class="stats-chart">
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hướng dẫn -->
+    <button class="toggle-instructions" onclick="toggleInstructions()">📖 Xem hướng dẫn</button>
+    <div class="instructions" id="instructions">
+        <h3>📋 Cách sử dụng Gói Cơ Bản:</h3>
+        <ol>
+            <li>🔹 Nhập <strong>5</strong> kết quả liên tiếp từ một giày bài mới (Player/Banker). Sau khi nhập đủ 5 kết quả, hệ thống sẽ tự động bắt đầu dự đoán 10 lần tiếp theo.</li>
+            <li>🔹 Trong 10 dự đoán này:
+                <ul>
+                    <li><strong>3 lần</strong> sẽ hiển thị <em>75.00%</em> và đưa ra gợi ý đặt cược (Player hoặc Banker).</li>
+                    <li><strong>7 lần</strong> sẽ hiển thị "Chế độ xem Cao cấp" với tỷ lệ <em>80.99%</em> và đưa ra gợi ý chính xác.</li>
+                </ul>
+            </li>
+            <li>🔹 <strong>Chế độ nâng cao</strong>: Cung cấp phân tích về xu hướng và thống kê chi tiết để giúp bạn đưa ra quyết định tốt hơn.</li>
+            <li>🔹 <strong>Báo cáo thống kê</strong>: Theo dõi hiệu suất của bạn qua các phiên đặt cược.</li>
+            <li>🔹 Gói Cơ Bản không giới hạn thời gian sử dụng và có tỷ lệ thắng được tối ưu hóa ở mức 75%.</li>
+        </ol>
+    </div>
+
+    <!-- Nâng cấp -->
+    <button class="upgrade-btn" onclick="showUpgradeOptions()">Nâng cấp lên Gói VIP (85%+)</button>
+
+    <!-- Chân trang -->
+    <div class="footer">
+        © 2025 Hệ thống dự đoán Baccarat Pro | Hỗ trợ: 
+        <a href="https://www.facebook.com/lang.tru.12" target="_blank">Trụ Lăng (FB)</a> 
+    </div>
+</div>
+
+<script>
+    // Hiển thị/ẩn hướng dẫn
+    function toggleInstructions() {
+        const instructions = document.getElementById('instructions');
+        const btn = document.querySelector('.toggle-instructions');
+        if (instructions.style.display === 'block') {
+            instructions.style.display = 'none';
+            btn.textContent = '📖 Xem hướng dẫn';
+        } else {
+            instructions.style.display = 'block';
+            btn.textContent = '📕 Ẩn hướng dẫn';
+        }
+    }
+    
+    // Nâng cấp tài khoản
+    function showUpgradeOptions() {
+        alert('Gói VIP cung cấp:\n- Tỷ lệ thắng tối ưu 85%+\n- Thuật toán AI dự đoán\n- Phân tích xu hướng thời gian thực\n- Hỗ trợ VIP 24/7\n\nVui lòng liên hệ Trụ Lăng trên FB để được hỗ trợ nâng cấp.');
+    }
+
+    // Tạo biến toàn cục để lưu trữ các biểu đồ
+    window.dataChart = null;
+    window.pieChart = null;
+    window.barChart = null;
+</script>
+</body>
+</html>
